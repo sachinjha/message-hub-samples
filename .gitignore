@@ -3,3 +3,4 @@ rest-nodejs-express-sample/node_modules
 *.classpath
 .project
 **.DS_Store
+/bin/

@@ -19,8 +19,10 @@
  */
 package com.messagehub.samples;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -34,6 +36,7 @@ import org.apache.log4j.Logger;
 import com.messagehub.samples.bluemix.BluemixEnvironment;
 import com.messagehub.samples.bluemix.MessageHubCredentials;
 import com.messagehub.samples.rest.RESTAdmin;
+import com.sun.javafx.geom.transform.GeneralTransform3D;
 
 /**
  * Console-based sample interacting with Message Hub, authenticating with SASL/PLAIN over an SSL connection.
@@ -206,7 +209,9 @@ public class MessageHubConsoleSample {
             }
 
             if (runProducer) {
+            	String mdmSessage  = getMDMessageString( );
                 Properties producerProperties = getClientConfiguration(clientProperties, "producer.properties", user, password);
+                producerProperties.put("MDM_Message", mdmSessage);
                 producerRunnable = new ProducerRunnable(producerProperties, topicName);
                 producerThread = new Thread(producerRunnable, "Producer Thread");
                 producerThread.start();
@@ -269,6 +274,31 @@ public class MessageHubConsoleSample {
         saslJaasConfig = saslJaasConfig.replace("USERNAME", user).replace("PASSWORD", password);
         result.setProperty("sasl.jaas.config", saslJaasConfig);
         return result;
+    }
+    
+    
+    static final String getMDMessageString(){
+    	StringBuffer messageString = new StringBuffer();
+    	final String messageFileName = "mdm_request.xml" ;
+    	try {
+            BufferedReader bf = new BufferedReader( new FileReader(resourceDir + File.separator + messageFileName) );
+            String line = "" ;
+            do {
+            	line = bf.readLine();
+            	if (line != null){
+            		messageString.append(line) ;
+            	}
+            }while (line != null );
+           
+            bf.close();
+            
+        } catch (IOException e) {
+            logger.log(Level.ERROR, "Could not load properties from file");
+            return "unable to read message string" ;
+        } 
+    	
+    	return messageString.toString() ;
+    	
     }
 
 }

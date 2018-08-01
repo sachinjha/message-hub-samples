@@ -39,6 +39,9 @@ public class ProducerRunnable implements Runnable {
     private final KafkaProducer<String, String> kafkaProducer;
     private final String topic;
     private volatile boolean closing = false;
+    private String mdmMessage ;
+    
+    
 
     public ProducerRunnable(Properties producerProperties, String topic) {
         this.topic = topic;
@@ -52,6 +55,7 @@ public class ProducerRunnable implements Runnable {
             // before throwing a TimeoutException
             // see configuration parameter 'metadata.fetch.timeout.ms'
             List<PartitionInfo> partitions = kafkaProducer.partitionsFor(topic);
+            mdmMessage = (String) producerProperties.get("MDM_Message");
             logger.log(Level.INFO, partitions.toString());
         } catch (TimeoutException kte) {
             logger.log(Level.ERROR, "Topic '" + topic + "' may not exist - application will terminate");
@@ -69,7 +73,8 @@ public class ProducerRunnable implements Runnable {
         try {
             while (!closing) {
                 String key = "key";
-                String message = "This is a test message #" + producedMessages;
+               // String message = "This is a test message #" + producedMessages;
+                String message =  producedMessages + "," + mdmMessage;
 
                 try {
                     // If a partition is not specified, the client will use the default partitioner to choose one.
